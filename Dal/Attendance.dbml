@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Attendance" Class="AttendanceDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="WebSettings" ConnectionString="Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\Attendance.mdf;Integrated Security=True" SettingsObjectName="System.Configuration.ConfigurationManager.ConnectionStrings" SettingsPropertyName="AttendanceConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.Roles" Member="Roles">
+    <Type Name="Role">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Role" Member="Role1" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="Role_User" Member="Users" ThisKey="Id" OtherKey="RoleId" Type="User" />
+    </Type>
+  </Table>
+  <Table Name="dbo.[User]" Member="Users">
+    <Type Name="User">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="RoleId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UserName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="Password" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="FirstName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="LastName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="User_UserCourse" Member="UserCourses" ThisKey="Id" OtherKey="UserId" Type="UserCourse" />
+      <Association Name="User_CourseAttendance" Member="CourseAttendances" ThisKey="Id" OtherKey="UserId" Type="CourseAttendance" />
+      <Association Name="Role_User" Member="Role" ThisKey="RoleId" OtherKey="Id" Type="Role" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserCourses" Member="UserCourses">
+    <Type Name="UserCourse">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="UserId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="CourseId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Created" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="User_UserCourse" Member="User" ThisKey="UserId" OtherKey="Id" Type="User" IsForeignKey="true" />
+      <Association Name="Course_UserCourse" Member="Course" ThisKey="CourseId" OtherKey="Id" Type="Course" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Course" Member="Courses">
+    <Type Name="Course">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CourseName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="CourseStartTime" Type="System.TimeSpan" DbType="Time" CanBeNull="true" />
+      <Column Name="CourseEndTime" Type="System.TimeSpan" DbType="Time" CanBeNull="true" />
+      <Column Name="CheckInStartTime" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="CheckInEndTime" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="CourseStartDate" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="CourseEndDate" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Association Name="Course_UserCourse" Member="UserCourses" ThisKey="Id" OtherKey="CourseId" Type="UserCourse" />
+      <Association Name="Course_CourseAttendance" Member="CourseAttendances" ThisKey="Id" OtherKey="CourseId" Type="CourseAttendance" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CourseAttendance" Member="CourseAttendances">
+    <Type Name="CourseAttendance">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CourseId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UserId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Status" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="Created" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="Disputed" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DisputedReason" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DisputedDate" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="DisputeRespondedBy" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Association Name="Course_CourseAttendance" Member="Course" ThisKey="CourseId" OtherKey="Id" Type="Course" IsForeignKey="true" />
+      <Association Name="User_CourseAttendance" Member="User" ThisKey="UserId" OtherKey="Id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+</Database>

@@ -1,0 +1,26 @@
+﻿@model AttendancePortal.Models.CoursesDetailsViewModel
+<form id="course-details-form">
+    <div>
+        <h4>Course Start Time: @Model.StartTime</h4>
+        <h4>Course End Time: @Model.EndTime</h4>
+        <h4>Before Check In Time: @Html.TextBoxFor(c => Model.BeforeCheckIn)</h4>
+        <h4>After Check In Time: @Html.TextBoxFor(c => Model.AfterCheckIn)</h4>
+        <div>
+            <h4>Assign students to the course:</h4>
+            <div class="row">
+                <div class="col-lg-1">
+
+                </div>
+                <div class="col-lg-11">
+                    @foreach (var student in Model.Students)
+                    {
+                        <div class="inline-block padLeft15 students-in-course">
+                            @Html.CheckBoxFor(c => student.Selected)
+                            <span data-studentid="@student.Id">@student.Name</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
