@@ -152,8 +152,11 @@
     <Compile Include="Areas\AttendanceApi\Models\ClassViewRange.cs" />
     <Compile Include="Areas\AttendanceApi\Models\Course.cs" />
     <Compile Include="Areas\AttendanceApi\Models\DisputeCourseRequest.cs" />
+    <Compile Include="Areas\AttendanceApi\Models\DisputeNotification.cs" />
     <Compile Include="Areas\AttendanceApi\Models\LoginModel.cs" />
     <Compile Include="Areas\AttendanceApi\Models\StudentCourseDetails.cs" />
+    <Compile Include="Code\Email.cs" />
+    <Compile Include="Code\NotificationHelper.cs" />
     <Compile Include="Code\Result.cs" />
     <Compile Include="Code\Result1.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -168,11 +171,18 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\CourseDisputeModel.cs" />
     <Compile Include="Models\CoursesDetailsViewModel.cs" />
     <Compile Include="Models\CoursesDetailsModel.cs" />
+    <Compile Include="Models\CourseStartNotification.cs" />
     <Compile Include="Models\CoursesViewModel.cs" />
+    <Compile Include="Models\DisputesViewModel.cs" />
     <Compile Include="Models\LoginViewModel.cs" />
+    <Compile Include="Models\ReportsViewModel.cs" />
     <Compile Include="Models\Student.cs" />
+    <Compile Include="Models\StudentCourseAttendance.cs" />
+    <Compile Include="Models\StudentReport.cs" />
+    <Compile Include="Models\UserView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -185,14 +195,20 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
+    <Content Include="Views\Home\Courses.cshtml" />
+    <Content Include="Views\Shared\CourseDetails.cshtml" />
+    <Content Include="Areas\AttendanceApi\Views\web.config" />
     <Content Include="Dal\Attendance.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
       <LastGenOutput>Attendance.designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Views\Home\Courses.cshtml" />
-    <Content Include="Views\Shared\CourseDetails.cshtml" />
-    <Content Include="Areas\AttendanceApi\Views\web.config" />
+    <None Include="Properties\PublishProfiles\attendanceportal.pubxml" />
+    <Content Include="Views\Home\Disputes.cshtml" />
+    <Content Include="Views\Shared\DisputeCourse.cshtml" />
+    <Content Include="Views\Home\Profile.cshtml" />
+    <Content Include="Views\Home\Reports.cshtml" />
+    <Content Include="Views\Shared\ReportsByCourse.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -204,13 +220,13 @@
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Areas\AttendanceApi\Views\Shared\" />
+    <Folder Include="Views\Api\" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Dal\Attendance.dbml.layout">
       <DependentUpon>Attendance.dbml</DependentUpon>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Areas\AttendanceApi\Views\Shared\" />
-    <Folder Include="Views\Api\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

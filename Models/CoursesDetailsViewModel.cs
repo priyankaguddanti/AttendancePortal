@@ -8,6 +8,9 @@ namespace AttendancePortal.Models
 {
     public class CoursesDetailsViewModel
     {
+        public int CourseId { get; set; }
+
+
         public string CourseTitle { get; set; }
 
         public string StartTime { get; set; }

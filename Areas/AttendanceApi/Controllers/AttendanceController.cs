@@ -8,6 +8,7 @@ using System.Web.Script;
 using AttendancePortal.Areas.AttendanceApi.Models;
 using AttendancePortal.Code;
 using AttendancePortal.Dal;
+using AttendancePortal.Models;
 
 namespace AttendancePortal.Controllers
 {
@@ -19,6 +20,44 @@ namespace AttendancePortal.Controllers
         public AttendanceController()
         {
             _dalHelper = new DalHelper();
+        }
+
+        [HttpGet]
+        public new HttpResponseMessage User(string userName)
+        {
+            var result = _dalHelper.GetUserByUserName(userName);
+            if (result.HasError)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError,
+                    new Result(HttpStatusCode.InternalServerError, "Unable to find the user"));
+            }
+            return Request.CreateResponse(HttpStatusCode.OK, new UserView
+            {
+                UserName = result.Value.UserName,
+                FirstName = result.Value.FirstName,
+                LastName = result.Value.LastName,
+                EmailAddress = result.Value.EmailAddress
+            });
+        }
+
+        [HttpPost]
+
+        public new HttpResponseMessage User(UserView user)
+        {
+            var result = _dalHelper.SaveUser(new User
+            {
+                EmailAddress = user.EmailAddress,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                UserName = user.UserName
+            });
+
+            if (result.HasError)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError,
+                    new Result(HttpStatusCode.InternalServerError, result.Message));
+            }
+            return Request.CreateResponse(HttpStatusCode.OK);
         }
 
         [HttpPost]

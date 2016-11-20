@@ -49,6 +49,6 @@ C:\Siva\AttendancePortal\AttendancePortal\bin\Newtonsoft.Json.xml
 C:\Siva\AttendancePortal\AttendancePortal\bin\System.Net.Http.Formatting.xml
 C:\Siva\AttendancePortal\AttendancePortal\bin\System.Web.Http.xml
 C:\Siva\AttendancePortal\AttendancePortal\bin\System.Web.Http.WebHost.xml
-C:\Siva\AttendancePortal\AttendancePortal\obj\Debug\AttendancePortal.csprojResolveAssemblyReference.cache
 C:\Siva\AttendancePortal\AttendancePortal\obj\Debug\AttendancePortal.dll
 C:\Siva\AttendancePortal\AttendancePortal\obj\Debug\AttendancePortal.pdb
+C:\Siva\AttendancePortal\AttendancePortal\obj\Debug\AttendancePortal.csprojResolveAssemblyReference.cache

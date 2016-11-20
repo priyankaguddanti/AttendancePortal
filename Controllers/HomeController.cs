@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
+using AttendancePortal.Code;
 using AttendancePortal.Dal;
 using AttendancePortal.Models;
 
@@ -15,12 +15,18 @@ namespace AttendancePortal.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            return View();
+           return View();
         }
 
-        public ActionResult Profile()
+        public new ActionResult Profile()
         {
-            return View();
+            var dalHelper = new DalHelper();
+            var userResult = dalHelper.GetUserByUserName(HttpContext.User.Identity.Name);
+
+            if(userResult.HasError)
+                throw new InvalidOperationException(userResult.Message);
+
+            return View(userResult.Value);
         }
 
         public ActionResult Courses()
@@ -36,25 +42,72 @@ namespace AttendancePortal.Controllers
 
         public ActionResult Disputes()
         {
-            return View();
+            var dalHelper = new DalHelper();
+            var courseResult = dalHelper.GetProfessorCoursesByUser(HttpContext.User.Identity.Name);
+            if (courseResult.HasError)
+                throw new InvalidOperationException(courseResult.Message);
+
+            if (courseResult.Value == null || !courseResult.Value.Any())
+            {
+                return View(new DisputesViewModel());
+            }
+
+            var disputeResult = dalHelper.GetDisputesByCourseId(courseResult.Value.FirstOrDefault().Id);
+            if(disputeResult.HasError)
+                throw new InvalidOperationException(disputeResult.Message);
+
+            var disputes = disputeResult.Value;
+            var model = new DisputesViewModel
+            {
+                AvailableCourses = courseResult.Value,
+                AvailableDisputes = disputes
+            };
+
+            return View(model);
         }
 
         public ActionResult Reports()
         {
-            return View();
+            var dalHelper = new DalHelper();
+
+            var courseResult = dalHelper.GetProfessorCoursesByUser(HttpContext.User.Identity.Name);
+            if (courseResult.HasError)
+                throw new InvalidOperationException(courseResult.Message);
+
+            if (courseResult.Value == null || !courseResult.Value.Any())
+            {
+                return View(new ReportsViewModel());
+            }
+            
+            var studentReportsResult = dalHelper.GetStudentReportByCourse(courseResult.Value.FirstOrDefault().Id);
+            if(studentReportsResult.HasError)
+                throw new InvalidOperationException(studentReportsResult.Message);
+
+            var reportModel = new ReportsViewModel
+            {
+                AvailableCourses = courseResult.Value,
+                StudentsReports = studentReportsResult.Value
+            };
+            return View(reportModel);
+        }
+
+        public PartialViewResult GetReportsByCourse(int courseId)
+        {
+            var dalHelper = new DalHelper();
+            var studentReportsResult = dalHelper.GetStudentReportByCourse(courseId);
+            if (studentReportsResult.HasError)
+                throw new InvalidOperationException(studentReportsResult.Message);
+
+            return PartialView("ReportsByCourse", new ReportsViewModel
+            {
+                StudentsReports = studentReportsResult.Value
+            });
         }
 
         public PartialViewResult GetCourseDetails(int courseId)
         {
-            var stopwatch = DateTime.Now;
-            Debug.WriteLine(stopwatch);
-            Debug.WriteLine($"started - {(DateTime.Now -stopwatch).Seconds}");
-
             var dalHelper = new DalHelper();
             var courseDetails = dalHelper.GetCourseDetails(courseId);
-
-            Debug.WriteLine($"after database call - {(DateTime.Now - stopwatch).Seconds}");
-
             var courseDetailsViewModel = new CoursesDetailsViewModel
             {
                 CourseTitle = courseDetails.Course.CourseName,
@@ -64,18 +117,13 @@ namespace AttendancePortal.Controllers
                 AfterCheckIn = courseDetails.Course.CheckInEndTime
             };
 
-            Debug.WriteLine($"after modal initialize - {(DateTime.Now - stopwatch).Seconds}");
-
             var students = new List<Student>();
-
             courseDetails.TotalUsers.ForEach(c => students.Add(new Student
             {
                 Id = c.Id,
                 Name = $"{c.FirstName} {c.LastName}",
                 Selected = false
             }));
-
-            Debug.WriteLine($"after total users call - {(DateTime.Now - stopwatch).Seconds}");
 
             foreach (var user in courseDetails.CourseUsers)
             {
@@ -84,19 +132,53 @@ namespace AttendancePortal.Controllers
                     firstOrDefault.Selected = true;
             }
 
-            Debug.WriteLine($"after student selection call - {(DateTime.Now - stopwatch).Seconds}");
-
             courseDetailsViewModel.Students = students;
 
-            Debug.WriteLine(stopwatch);
-
             return PartialView("CourseDetails", courseDetailsViewModel);
+        }
+
+        public PartialViewResult GetDisputeCourses(int courseId)
+        {
+            var dalHelper = new DalHelper();
+            var disputeResult = dalHelper.GetDisputesByCourseId(courseId);
+            
+            if (disputeResult.HasError)
+                throw new InvalidOperationException(disputeResult.Message);
+
+            var model = new DisputesViewModel {AvailableDisputes = disputeResult.Value};
+            
+            return PartialView("DisputeCourse", model);
+        }
+
+        [HttpPost]
+        public JsonResult SaveProfile(User user)
+        {
+            var dalHelper = new DalHelper();
+            var result = dalHelper.SaveUser(user);
+            return result.HasError
+                ? Json(new { Message = "Save Failed" }, JsonRequestBehavior.AllowGet)
+                : Json(new { Message = "Success" }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
         public JsonResult SaveCourseDetails(CoursesDetailsViewModel model)
         {
-            return Json(new {}, JsonRequestBehavior.AllowGet);
+            var dalHelper = new DalHelper();
+            var result = dalHelper.UpdateCourseDetals(model);
+
+            return result.HasError
+                ? Json(new { Message = "Save Failed" }, JsonRequestBehavior.AllowGet)
+                : Json(new { Message = "Saved" }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult SaveDisputeResponse(int courseAttendanceId, bool disputeAccepted)
+        {
+            var dalHelper = new DalHelper();
+            var result = dalHelper.SaveDisputeResponse(courseAttendanceId, disputeAccepted);
+
+            return result.HasError
+                ? Json(new { Message = "Failed" }, JsonRequestBehavior.AllowGet)
+                : Json(new { Message = "Success" }, JsonRequestBehavior.AllowGet);
         }
     }
 }

@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewBag.Title = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Welcome @HttpContext.Current.User.Identity.Name!</h1>
+<div class="row">
+    <div class="col-md-8">
+        <h3><b><a href="/Home/Profile">Profile</a></b></h3><br/>
+        <h3><b><a href="/Home/Courses">Courses</a></b></h3><br/>
+        <h3><b><a href="/Home/Disputes">Disputes</a></b></h3><br/>
+        <h2><b><a href="/Home/Reports">Reports</a></b></h2>
+    </div>
+</div>
+
+

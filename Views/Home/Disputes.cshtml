@@ -1,0 +1,47 @@
+﻿@model AttendancePortal.Models.DisputesViewModel
+@{
+    ViewBag.Title = "Disputes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int i = 0;
+    string buttonActive = string.Empty;
+}
+
+@if (Model.AvailableCourses.Any())
+{
+    <h2>Please select a course from below:</h2>
+    <div class="courses-group">
+        @foreach (var course in Model.AvailableCourses)
+        {
+            buttonActive = i == 0 ? "btn-primary" : "btn-info";
+            i++;
+            <button type="button" data-courseid="@course.Id" class="btn @buttonActive course-item">@course.CourseName</button>
+        }
+    </div>
+    <div class="disputes-container">
+        @Html.Partial("DisputeCourse", Model)
+    </div>
+    <script type="text/javascript">
+        $('.courses-group button')
+            .click(function() {
+                $('.courses-group button').addClass('btn-info');
+                var $o = $(this);
+                $o.removeClass('btn-info');
+                $o.addClass('btn-primary');
+                $o.button('loading');
+                $.ajax({
+                        url: "/home/GetDisputeCourses?courseId=" + $o.data('courseid'),
+                        cache: false
+                    })
+                    .done(function(response) {
+                        $o.button('reset');
+                        $('.disputes-container').html(response);
+                    });
+            });
+    </script>
+}
+else
+{
+    <div>
+        <h1>There are no courses assigned to @HttpContext.Current.User.Identity.Name</h1>
+    </div>
+}

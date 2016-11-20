@@ -1,0 +1,57 @@
+﻿@model AttendancePortal.Models.DisputesViewModel
+<form id="course-dispute-form">
+    <div>
+        <div class="alert-success hide pad15">
+            Notication has been saved
+        </div>
+        <div class="alert-danger hide pad15">
+            Unable to save, please try again later
+        </div>
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Reason</th>
+                <th>Disputed Date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var dispute in Model.AvailableDisputes)
+            {
+                <tr>
+                    <td>@dispute.StudentName</td>
+                    <td>@dispute.Reason</td>
+                    <td>@dispute.DisputedDate</td>
+                    <td>
+                        <button type="button" data-disputeaction="true" data-courseattendanceid="@dispute.CourseAttendanceId" class="btn btn-success marginLeft15 btn-dispute-action">Accept</button>
+                        <button type="button" data-disputeaction="false" data-courseattendanceid="@dispute.CourseAttendanceId" class="btn btn-danger marginLeft15 btn-dispute-action">Reject</button>
+                        @Html.HiddenFor(c => dispute.CourseAttendanceId)
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <script type="text/javascript">
+        $('.btn-dispute-action').click(function () {
+            var $o = $(this);
+            var courseAttendanceId = $o.parent().find('input:hidden').val();
+            var disputeAction = $o.data('disputeaction');
+            $.ajax({
+                url: "/home/SaveDisputeResponse?courseAttendanceId=" + courseAttendanceId + "&disputeAccepted=" + disputeAction,
+                cache: false
+                })
+           .done(function (response) {
+               if (response.Message === 'Success') {
+                   $o.parent().parent().remove();
+                   $('.alert-success').removeClass('hide');
+                   setTimeout(function () { $('.alert-success').addClass('hide'); }, 1000);
+               } else {
+                   $('.alert-danger').removeClass('hide');
+                   setTimeout(function () { $('.alert-danger').addClass('hide'); }, 1000);
+               }
+           });
+        });
+    </script>
+</form>

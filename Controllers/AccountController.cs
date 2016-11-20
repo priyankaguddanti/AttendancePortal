@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 using AttendancePortal.Dal;
@@ -37,6 +33,11 @@ namespace AttendancePortal.Controllers
             {
                 return View(model);
             }
+            var dalHelper = new DalHelper();
+            var userResult = dalHelper.GetUserByUserName(model.UserName);
+
+            if(userResult.HasError)
+                throw new InvalidOperationException(userResult.Message);
             
             FormsAuthentication.SetAuthCookie(model.UserName,false);
 

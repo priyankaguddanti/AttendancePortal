@@ -22,7 +22,7 @@ namespace AttendancePortal.Dal
 	using System;
 	
 	
-	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="Attendance")]
+	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="AttendanceSystem")]
 	public partial class AttendanceDataContext : System.Data.Linq.DataContext
 	{
 		
@@ -39,16 +39,16 @@ namespace AttendancePortal.Dal
     partial void InsertUserCourse(UserCourse instance);
     partial void UpdateUserCourse(UserCourse instance);
     partial void DeleteUserCourse(UserCourse instance);
-    partial void InsertCourse(Course instance);
-    partial void UpdateCourse(Course instance);
-    partial void DeleteCourse(Course instance);
     partial void InsertCourseAttendance(CourseAttendance instance);
     partial void UpdateCourseAttendance(CourseAttendance instance);
     partial void DeleteCourseAttendance(CourseAttendance instance);
+    partial void InsertCourse(Course instance);
+    partial void UpdateCourse(Course instance);
+    partial void DeleteCourse(Course instance);
     #endregion
 		
 		public AttendanceDataContext() : 
-				base(global::System.Configuration.ConfigurationManager.ConnectionStrings["AttendanceConnectionString"].ConnectionString, mappingSource)
+				base(global::System.Configuration.ConfigurationManager.ConnectionStrings["AttendanceSystemConnectionString"].ConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
@@ -101,19 +101,19 @@ namespace AttendancePortal.Dal
 			}
 		}
 		
-		public System.Data.Linq.Table<Course> Courses
-		{
-			get
-			{
-				return this.GetTable<Course>();
-			}
-		}
-		
 		public System.Data.Linq.Table<CourseAttendance> CourseAttendances
 		{
 			get
 			{
 				return this.GetTable<CourseAttendance>();
+			}
+		}
+		
+		public System.Data.Linq.Table<Course> Courses
+		{
+			get
+			{
+				return this.GetTable<Course>();
 			}
 		}
 	}
@@ -250,6 +250,8 @@ namespace AttendancePortal.Dal
 		
 		private string _LastName;
 		
+		private string _EmailAddress;
+		
 		private EntitySet<UserCourse> _UserCourses;
 		
 		private EntitySet<CourseAttendance> _CourseAttendances;
@@ -272,6 +274,8 @@ namespace AttendancePortal.Dal
     partial void OnFirstNameChanged();
     partial void OnLastNameChanging(string value);
     partial void OnLastNameChanged();
+    partial void OnEmailAddressChanging(string value);
+    partial void OnEmailAddressChanged();
     #endregion
 		
 		public User()
@@ -402,6 +406,26 @@ namespace AttendancePortal.Dal
 					this._LastName = value;
 					this.SendPropertyChanged("LastName");
 					this.OnLastNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EmailAddress", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string EmailAddress
+		{
+			get
+			{
+				return this._EmailAddress;
+			}
+			set
+			{
+				if ((this._EmailAddress != value))
+				{
+					this.OnEmailAddressChanging(value);
+					this.SendPropertyChanging();
+					this._EmailAddress = value;
+					this.SendPropertyChanged("EmailAddress");
+					this.OnEmailAddressChanged();
 				}
 			}
 		}
@@ -727,6 +751,342 @@ namespace AttendancePortal.Dal
 		}
 	}
 	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CourseAttendance")]
+	public partial class CourseAttendance : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _Id;
+		
+		private int _CourseId;
+		
+		private int _UserId;
+		
+		private string _Status;
+		
+		private System.DateTime _Created;
+		
+		private bool _Disputed;
+		
+		private string _DisputedReason;
+		
+		private System.Nullable<System.DateTime> _DisputedDate;
+		
+		private System.Nullable<int> _DisputeRespondedBy;
+		
+		private EntityRef<User> _User;
+		
+		private EntityRef<Course> _Course;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    partial void OnCourseIdChanging(int value);
+    partial void OnCourseIdChanged();
+    partial void OnUserIdChanging(int value);
+    partial void OnUserIdChanged();
+    partial void OnStatusChanging(string value);
+    partial void OnStatusChanged();
+    partial void OnCreatedChanging(System.DateTime value);
+    partial void OnCreatedChanged();
+    partial void OnDisputedChanging(bool value);
+    partial void OnDisputedChanged();
+    partial void OnDisputedReasonChanging(string value);
+    partial void OnDisputedReasonChanged();
+    partial void OnDisputedDateChanging(System.Nullable<System.DateTime> value);
+    partial void OnDisputedDateChanged();
+    partial void OnDisputeRespondedByChanging(System.Nullable<int> value);
+    partial void OnDisputeRespondedByChanged();
+    #endregion
+		
+		public CourseAttendance()
+		{
+			this._User = default(EntityRef<User>);
+			this._Course = default(EntityRef<Course>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int Id
+		{
+			get
+			{
+				return this._Id;
+			}
+			set
+			{
+				if ((this._Id != value))
+				{
+					this.OnIdChanging(value);
+					this.SendPropertyChanging();
+					this._Id = value;
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CourseId", DbType="Int NOT NULL")]
+		public int CourseId
+		{
+			get
+			{
+				return this._CourseId;
+			}
+			set
+			{
+				if ((this._CourseId != value))
+				{
+					if (this._Course.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCourseIdChanging(value);
+					this.SendPropertyChanging();
+					this._CourseId = value;
+					this.SendPropertyChanged("CourseId");
+					this.OnCourseIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserId", DbType="Int NOT NULL")]
+		public int UserId
+		{
+			get
+			{
+				return this._UserId;
+			}
+			set
+			{
+				if ((this._UserId != value))
+				{
+					if (this._User.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnUserIdChanging(value);
+					this.SendPropertyChanging();
+					this._UserId = value;
+					this.SendPropertyChanged("UserId");
+					this.OnUserIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Status", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string Status
+		{
+			get
+			{
+				return this._Status;
+			}
+			set
+			{
+				if ((this._Status != value))
+				{
+					this.OnStatusChanging(value);
+					this.SendPropertyChanging();
+					this._Status = value;
+					this.SendPropertyChanged("Status");
+					this.OnStatusChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Created", DbType="DateTime NOT NULL")]
+		public System.DateTime Created
+		{
+			get
+			{
+				return this._Created;
+			}
+			set
+			{
+				if ((this._Created != value))
+				{
+					this.OnCreatedChanging(value);
+					this.SendPropertyChanging();
+					this._Created = value;
+					this.SendPropertyChanged("Created");
+					this.OnCreatedChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Disputed", DbType="Bit NOT NULL")]
+		public bool Disputed
+		{
+			get
+			{
+				return this._Disputed;
+			}
+			set
+			{
+				if ((this._Disputed != value))
+				{
+					this.OnDisputedChanging(value);
+					this.SendPropertyChanging();
+					this._Disputed = value;
+					this.SendPropertyChanged("Disputed");
+					this.OnDisputedChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DisputedReason", DbType="NVarChar(MAX)")]
+		public string DisputedReason
+		{
+			get
+			{
+				return this._DisputedReason;
+			}
+			set
+			{
+				if ((this._DisputedReason != value))
+				{
+					this.OnDisputedReasonChanging(value);
+					this.SendPropertyChanging();
+					this._DisputedReason = value;
+					this.SendPropertyChanged("DisputedReason");
+					this.OnDisputedReasonChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DisputedDate", DbType="DateTime")]
+		public System.Nullable<System.DateTime> DisputedDate
+		{
+			get
+			{
+				return this._DisputedDate;
+			}
+			set
+			{
+				if ((this._DisputedDate != value))
+				{
+					this.OnDisputedDateChanging(value);
+					this.SendPropertyChanging();
+					this._DisputedDate = value;
+					this.SendPropertyChanged("DisputedDate");
+					this.OnDisputedDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DisputeRespondedBy", DbType="Int")]
+		public System.Nullable<int> DisputeRespondedBy
+		{
+			get
+			{
+				return this._DisputeRespondedBy;
+			}
+			set
+			{
+				if ((this._DisputeRespondedBy != value))
+				{
+					this.OnDisputeRespondedByChanging(value);
+					this.SendPropertyChanging();
+					this._DisputeRespondedBy = value;
+					this.SendPropertyChanged("DisputeRespondedBy");
+					this.OnDisputeRespondedByChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_CourseAttendance", Storage="_User", ThisKey="UserId", OtherKey="Id", IsForeignKey=true)]
+		public User User
+		{
+			get
+			{
+				return this._User.Entity;
+			}
+			set
+			{
+				User previousValue = this._User.Entity;
+				if (((previousValue != value) 
+							|| (this._User.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._User.Entity = null;
+						previousValue.CourseAttendances.Remove(this);
+					}
+					this._User.Entity = value;
+					if ((value != null))
+					{
+						value.CourseAttendances.Add(this);
+						this._UserId = value.Id;
+					}
+					else
+					{
+						this._UserId = default(int);
+					}
+					this.SendPropertyChanged("User");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Course_CourseAttendance", Storage="_Course", ThisKey="CourseId", OtherKey="Id", IsForeignKey=true)]
+		public Course Course
+		{
+			get
+			{
+				return this._Course.Entity;
+			}
+			set
+			{
+				Course previousValue = this._Course.Entity;
+				if (((previousValue != value) 
+							|| (this._Course.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Course.Entity = null;
+						previousValue.CourseAttendances.Remove(this);
+					}
+					this._Course.Entity = value;
+					if ((value != null))
+					{
+						value.CourseAttendances.Add(this);
+						this._CourseId = value.Id;
+					}
+					else
+					{
+						this._CourseId = default(int);
+					}
+					this.SendPropertyChanged("Course");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Course")]
 	public partial class Course : INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -1010,342 +1370,6 @@ namespace AttendancePortal.Dal
 		{
 			this.SendPropertyChanging();
 			entity.Course = null;
-		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CourseAttendance")]
-	public partial class CourseAttendance : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _Id;
-		
-		private int _CourseId;
-		
-		private int _UserId;
-		
-		private string _Status;
-		
-		private System.DateTime _Created;
-		
-		private bool _Disputed;
-		
-		private string _DisputedReason;
-		
-		private System.Nullable<System.DateTime> _DisputedDate;
-		
-		private System.Nullable<int> _DisputeRespondedBy;
-		
-		private EntityRef<Course> _Course;
-		
-		private EntityRef<User> _User;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnIdChanging(int value);
-    partial void OnIdChanged();
-    partial void OnCourseIdChanging(int value);
-    partial void OnCourseIdChanged();
-    partial void OnUserIdChanging(int value);
-    partial void OnUserIdChanged();
-    partial void OnStatusChanging(string value);
-    partial void OnStatusChanged();
-    partial void OnCreatedChanging(System.DateTime value);
-    partial void OnCreatedChanged();
-    partial void OnDisputedChanging(bool value);
-    partial void OnDisputedChanged();
-    partial void OnDisputedReasonChanging(string value);
-    partial void OnDisputedReasonChanged();
-    partial void OnDisputedDateChanging(System.Nullable<System.DateTime> value);
-    partial void OnDisputedDateChanged();
-    partial void OnDisputeRespondedByChanging(System.Nullable<int> value);
-    partial void OnDisputeRespondedByChanged();
-    #endregion
-		
-		public CourseAttendance()
-		{
-			this._Course = default(EntityRef<Course>);
-			this._User = default(EntityRef<User>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int Id
-		{
-			get
-			{
-				return this._Id;
-			}
-			set
-			{
-				if ((this._Id != value))
-				{
-					this.OnIdChanging(value);
-					this.SendPropertyChanging();
-					this._Id = value;
-					this.SendPropertyChanged("Id");
-					this.OnIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CourseId", DbType="Int NOT NULL")]
-		public int CourseId
-		{
-			get
-			{
-				return this._CourseId;
-			}
-			set
-			{
-				if ((this._CourseId != value))
-				{
-					if (this._Course.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnCourseIdChanging(value);
-					this.SendPropertyChanging();
-					this._CourseId = value;
-					this.SendPropertyChanged("CourseId");
-					this.OnCourseIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserId", DbType="Int NOT NULL")]
-		public int UserId
-		{
-			get
-			{
-				return this._UserId;
-			}
-			set
-			{
-				if ((this._UserId != value))
-				{
-					if (this._User.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnUserIdChanging(value);
-					this.SendPropertyChanging();
-					this._UserId = value;
-					this.SendPropertyChanged("UserId");
-					this.OnUserIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Status", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
-		public string Status
-		{
-			get
-			{
-				return this._Status;
-			}
-			set
-			{
-				if ((this._Status != value))
-				{
-					this.OnStatusChanging(value);
-					this.SendPropertyChanging();
-					this._Status = value;
-					this.SendPropertyChanged("Status");
-					this.OnStatusChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Created", DbType="DateTime NOT NULL")]
-		public System.DateTime Created
-		{
-			get
-			{
-				return this._Created;
-			}
-			set
-			{
-				if ((this._Created != value))
-				{
-					this.OnCreatedChanging(value);
-					this.SendPropertyChanging();
-					this._Created = value;
-					this.SendPropertyChanged("Created");
-					this.OnCreatedChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Disputed", DbType="Bit NOT NULL")]
-		public bool Disputed
-		{
-			get
-			{
-				return this._Disputed;
-			}
-			set
-			{
-				if ((this._Disputed != value))
-				{
-					this.OnDisputedChanging(value);
-					this.SendPropertyChanging();
-					this._Disputed = value;
-					this.SendPropertyChanged("Disputed");
-					this.OnDisputedChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DisputedReason", DbType="NVarChar(MAX)")]
-		public string DisputedReason
-		{
-			get
-			{
-				return this._DisputedReason;
-			}
-			set
-			{
-				if ((this._DisputedReason != value))
-				{
-					this.OnDisputedReasonChanging(value);
-					this.SendPropertyChanging();
-					this._DisputedReason = value;
-					this.SendPropertyChanged("DisputedReason");
-					this.OnDisputedReasonChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DisputedDate", DbType="DateTime")]
-		public System.Nullable<System.DateTime> DisputedDate
-		{
-			get
-			{
-				return this._DisputedDate;
-			}
-			set
-			{
-				if ((this._DisputedDate != value))
-				{
-					this.OnDisputedDateChanging(value);
-					this.SendPropertyChanging();
-					this._DisputedDate = value;
-					this.SendPropertyChanged("DisputedDate");
-					this.OnDisputedDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DisputeRespondedBy", DbType="Int")]
-		public System.Nullable<int> DisputeRespondedBy
-		{
-			get
-			{
-				return this._DisputeRespondedBy;
-			}
-			set
-			{
-				if ((this._DisputeRespondedBy != value))
-				{
-					this.OnDisputeRespondedByChanging(value);
-					this.SendPropertyChanging();
-					this._DisputeRespondedBy = value;
-					this.SendPropertyChanged("DisputeRespondedBy");
-					this.OnDisputeRespondedByChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Course_CourseAttendance", Storage="_Course", ThisKey="CourseId", OtherKey="Id", IsForeignKey=true)]
-		public Course Course
-		{
-			get
-			{
-				return this._Course.Entity;
-			}
-			set
-			{
-				Course previousValue = this._Course.Entity;
-				if (((previousValue != value) 
-							|| (this._Course.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Course.Entity = null;
-						previousValue.CourseAttendances.Remove(this);
-					}
-					this._Course.Entity = value;
-					if ((value != null))
-					{
-						value.CourseAttendances.Add(this);
-						this._CourseId = value.Id;
-					}
-					else
-					{
-						this._CourseId = default(int);
-					}
-					this.SendPropertyChanged("Course");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="User_CourseAttendance", Storage="_User", ThisKey="UserId", OtherKey="Id", IsForeignKey=true)]
-		public User User
-		{
-			get
-			{
-				return this._User.Entity;
-			}
-			set
-			{
-				User previousValue = this._User.Entity;
-				if (((previousValue != value) 
-							|| (this._User.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._User.Entity = null;
-						previousValue.CourseAttendances.Remove(this);
-					}
-					this._User.Entity = value;
-					if ((value != null))
-					{
-						value.CourseAttendances.Add(this);
-						this._UserId = value.Id;
-					}
-					else
-					{
-						this._UserId = default(int);
-					}
-					this.SendPropertyChanged("User");
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
 		}
 	}
 }

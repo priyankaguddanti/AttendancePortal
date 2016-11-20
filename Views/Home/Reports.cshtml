@@ -1,0 +1,45 @@
+﻿@model AttendancePortal.Models.ReportsViewModel
+@{
+    ViewBag.Title = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int i = 0;
+    string buttonActive = "";
+}
+
+@if (Model.AvailableCourses.Any())
+{
+    <h1>Please select any course to get reports of students:</h1>
+    <div class="courses-group">
+        @foreach (var course in Model.AvailableCourses)
+        {
+            buttonActive = i == 0 ? "btn-primary" : "btn-info";
+            i++;
+            <button type="button" data-courseid="@course.Id" class="btn @buttonActive course-item">@course.CourseName</button>
+        }
+    </div>
+    <div class="reports-course-container">
+        @Html.Partial("ReportsByCourse", Model)
+    </div>
+    <script type="text/javascript">
+        $('.courses-group button')
+            .click(function () {
+                $('.courses-group button').addClass('btn-info');
+                var $o = $(this);
+                $o.removeClass('btn-info');
+                $o.addClass('btn-primary');
+                $o.button('loading');
+                $.ajax({
+                    url: "/home/GetReportsByCourse?courseId=" + $o.data('courseid'),
+                    cache: false
+                })
+                    .done(function (response) {
+                        $o.button('reset');
+                        $('.reports-course-container').html(response);
+                    });
+            });
+    </script>
+}
+else
+{
+    <h1>There are no courses assigned to @HttpContext.Current.User.Identity.Name</h1>
+}

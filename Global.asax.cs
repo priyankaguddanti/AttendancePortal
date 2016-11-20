@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Timers;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
-using System.Web.Security;
-using System.Web.SessionState;
 using System.Web.Http;
+using AttendancePortal.Code;
 
 namespace AttendancePortal
 {
@@ -17,7 +15,17 @@ namespace AttendancePortal
             // Code that runs on application startup
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
-            RouteConfig.RegisterRoutes(RouteTable.Routes);            
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+
+            //set the process based on a time
+            //var sendCourseStartTimer = new Timer(5*60*1000);
+            //sendCourseStartTimer.Start();
+            //sendCourseStartTimer.Elapsed += SendCourseStartNotification;
+            //NotificationHelper.SendCourseStartNotifications();
+        }
+        private static void SendCourseStartNotification(object source, ElapsedEventArgs e)
+        {
+            NotificationHelper.SendCourseStartNotifications();
         }
     }
 }

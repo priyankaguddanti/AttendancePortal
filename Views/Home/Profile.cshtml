@@ -1,0 +1,50 @@
+﻿@model AttendancePortal.Dal.User
+@{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="profile-container">
+    <h2>Profile</h2>
+    <div class="alert-success hide pad15">
+        Profile changes saved
+    </div>
+    <div class="alert-danger hide pad15">
+        Unable to save, please try again later
+    </div>
+    <div>
+        <h4>First Name : @Html.TextBoxFor(c => c.FirstName)</h4>
+        <h4>Last Name : @Html.TextBoxFor(c => c.LastName)</h4>
+        <h4>Email address : @Html.TextBoxFor(c => c.EmailAddress)</h4>
+        @Html.HiddenFor(c => c.UserName)
+        <div class="marginLeft15">
+            <button type="button" class="btn btn-primary btn-save">Save</button>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $('.btn-save').click(function () {
+            var user = {
+                FirstName: $('#FirstName').val(),
+                LastName: $('#LastName').val(),
+                EmailAddress: $('#EmailAddress').val(),
+                UserName : $('#UserName').val()
+            };
+
+            $.ajax({
+                url: "/home/SaveProfile",
+                cache: false,
+                data: user,
+                type: 'POST'
+            })
+                .done(function (response) {
+                    if (response.Message === 'Success') {
+                        $('.alert-success').removeClass('hide');
+                        setTimeout(function () { $('.alert-success').addClass('hide'); }, 1000);
+                    } else {
+                        $('.alert-danger').removeClass('hide');
+                        setTimeout(function () { $('.alert-danger').addClass('hide'); }, 1000);
+                    }
+                });
+        });
+    </script>
+</div>

@@ -33,7 +33,192 @@ namespace AttendancePortal.Dal
 
         public Result<List<Course>> GetProfessorCoursesByUser(string userName)
         {
-            return new Result<List<Course>>(HttpStatusCode.OK);
+            try
+            {
+                using (var context = new AttendanceDataContext())
+                {
+                    var user = context.Users.FirstOrDefault(c => c.UserName == userName);
+                    if (user == null)
+                        throw new InvalidOperationException("user not found");
+
+                    var courses = context.UserCourses.Where(c => c.UserId == user.Id).Select(j => j.Course).ToList();
+
+                    return new Result<List<Course>>(courses);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Result<List<Course>>(HttpStatusCode.InternalServerError, "Unable to get courses");
+            }
+        }
+
+        public Result SaveUser(User user)
+        {
+            try
+            {
+                using (var context = new AttendanceDataContext())
+                {
+                    var dalUser = context.Users.FirstOrDefault(c => c.UserName == user.UserName);
+
+                    if (dalUser == null)
+                        throw new InvalidOperationException("user is null");
+
+                    dalUser.FirstName = user.FirstName;
+                    dalUser.LastName = user.LastName;
+                    dalUser.EmailAddress = user.EmailAddress;
+
+                    context.SubmitChanges();
+                    return new Result();
+                }
+            }
+            catch (Exception)
+            {
+                return new Result(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public Result<List<StudentReport>> GetStudentReportByCourse(int courseId)
+        {
+            try
+            {
+                var studentReports = new List<StudentReport>();
+                using (var context = new AttendanceDataContext())
+                {
+                    var studentCourseAttendances = from uc in context.CourseAttendances
+                        join u in context.Users on uc.UserId equals u.Id
+                        where uc.CourseId == courseId
+                        select new StudentCourseAttendance
+                        {
+                            Name = $"{u.FirstName} {u.LastName}",
+                            Status = uc.Status
+                        };
+
+                    var studentCourseAttendancesList = studentCourseAttendances.ToList();
+
+                    foreach (var courseAttendances in studentCourseAttendancesList.GroupBy(c => c.Name))
+                    {
+                        studentReports.Add(new StudentReport
+                        {
+                            Name = courseAttendances.Key,
+                            TotalAbsents =
+                                courseAttendances.Count(c => c.Status.Equals(AttendanceStatus.Absent.ToString())),
+                            TotalTardy =
+                                courseAttendances.Count(c => c.Status.Equals(AttendanceStatus.Tardy.ToString())),
+                            TotalPresents =
+                                courseAttendances.Count(c => c.Status.Equals(AttendanceStatus.Present.ToString())),
+                        });
+                    }
+                }
+
+                return new Result<List<StudentReport>>(studentReports);
+            }
+            catch (Exception)
+            {
+                return new Result<List<StudentReport>>(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public Result<List<CourseDisputeModel>> GetDisputesByCourseId(int courseId)
+        {
+            using (var context = new AttendanceDataContext())
+            {
+                var studentDisputeDetails = from c in context.CourseAttendances
+                    join ua in context.Users on c.UserId equals ua.Id
+                    where (c.CourseId == courseId && c.Disputed && c.DisputeRespondedBy == null)
+                    select new CourseDisputeModel
+                    {
+                        DisputedDate = c.DisputedDate.Value.ToShortDateString(),
+                        StudentName = $"{ua.FirstName}{ua.LastName}",
+                        IsDisputed = c.Disputed,
+                        CourseAttendanceId = c.Id,
+                        Reason = c.DisputedReason
+                    };
+
+                return new Result<List<CourseDisputeModel>>(studentDisputeDetails.ToList());
+            }
+        }
+
+        public Result UpdateCourseDetals(CoursesDetailsViewModel model)
+        {
+            try
+            {
+                using (var context = new AttendanceDataContext())
+                {
+                    var course = context.Courses.FirstOrDefault(c => c.Id == model.CourseId);
+                    if (course == null)
+                        throw new InvalidOperationException("Course is not found");
+
+                    course.CheckInStartTime = model.BeforeCheckIn;
+                    course.CheckInEndTime = model.AfterCheckIn;
+
+                    foreach (var student in model.Students)
+                    {
+                        var currentUserCourse =
+                            context.UserCourses.FirstOrDefault(
+                                c => c.CourseId == model.CourseId && c.UserId == student.Id);
+                        if (student.Selected)
+                        {
+                            if (currentUserCourse == null)
+                            {
+                                context.UserCourses.InsertOnSubmit(new UserCourse
+                                {
+                                    CourseId = model.CourseId,
+                                    UserId = student.Id,
+                                    Created = DateTime.Now
+                                });
+                            }
+                        }
+                        else
+                        {
+                            if (currentUserCourse != null)
+                            {
+                                context.UserCourses.DeleteOnSubmit(currentUserCourse);
+                            }
+                        }
+                    }
+
+                    context.SubmitChanges();
+
+                    return new Result();
+                }
+            }
+            catch (Exception)
+            {
+                return new Result(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public Result SaveDisputeResponse(int courseAttendanceId, bool disputeAccepted = false)
+        {
+            try
+            {
+                var userReult = GetUserByUserName(HttpContext.Current.User.Identity.Name);
+                if (userReult.HasError)
+                    return userReult;
+
+                using (var context = new AttendanceDataContext())
+                {
+                    var courseAttendant = context.CourseAttendances.FirstOrDefault(c => c.Id == courseAttendanceId);
+
+                    if (courseAttendant == null)
+                    {
+                        throw new InvalidOperationException("course attendant is null");
+                    }
+
+                    courseAttendant.Status = disputeAccepted
+                        ? AttendanceStatus.Present.ToString()
+                        : AttendanceStatus.Absent.ToString();
+                    courseAttendant.DisputeRespondedBy = userReult.Value.Id;
+
+                    context.SubmitChanges();
+
+                    return new Result();
+                }
+            }
+            catch (Exception)
+            {
+                return new Result(HttpStatusCode.InternalServerError);
+            }
         }
 
         public Result<List<StudentCourseDetails>> GetStudentCoursesByUser(string userName)
@@ -47,8 +232,6 @@ namespace AttendancePortal.Dal
             {
                 var studentCourseDetails = from uc in context.UserCourses
                     join c in context.Courses on uc.CourseId equals c.Id
-                    join ca in context.CourseAttendances on uc.CourseId equals ca.CourseId into ss
-                    from ca in ss.DefaultIfEmpty()
                     where uc.UserId == result.Value.Id
                     select new StudentCourseDetails
                     {
@@ -57,11 +240,28 @@ namespace AttendancePortal.Dal
                         CheckInEndTime = c.CheckInEndTime,
                         CourseId = c.Id,
                         CourseEndTime = c.CourseEndTime,
-                        Status = ca.Status,
                         CourseName = c.CourseName
                     };
 
-                return new Result<List<StudentCourseDetails>>(studentCourseDetails.ToList());
+                var studentCourseDetailsList = studentCourseDetails.ToList();
+
+                var courseIds = studentCourseDetailsList.Select(c => c.CourseId);
+                var courseAttendanceDetails =
+                    context.CourseAttendances.Where(
+                        c =>
+                            c.UserId == result.Value.Id && courseIds.Contains(c.CourseId) &&
+                            c.Created.Date == DateTime.Now.Date);
+
+                foreach (var courseAttendance in courseAttendanceDetails)
+                {
+                    var studentCourse =
+                        studentCourseDetailsList.FirstOrDefault(c => c.CourseId == courseAttendance.CourseId);
+                    if (studentCourse != null)
+                    {
+                        studentCourse.Status = courseAttendance.Status;
+                    }
+                }
+                return new Result<List<StudentCourseDetails>>(studentCourseDetailsList.ToList());
             }
         }
 
@@ -184,7 +384,8 @@ namespace AttendancePortal.Dal
             {
                 using (var context = new AttendanceDataContext())
                 {
-                    var courseAttendance = context.CourseAttendances.FirstOrDefault(c => c.Id == request.CourseAttendanceId);
+                    var courseAttendance =
+                        context.CourseAttendances.FirstOrDefault(c => c.Id == request.CourseAttendanceId);
 
                     if (courseAttendance == null)
                         return new Result(HttpStatusCode.InternalServerError, "Unable to find the course attended");
@@ -193,7 +394,26 @@ namespace AttendancePortal.Dal
                     courseAttendance.DisputedReason = request.DisputeReason;
                     courseAttendance.DisputedDate = DateTime.Now;
 
+                    //send notification email
+                    var professorDetails = from uc in context.UserCourses
+                        join u in context.Users on uc.UserId equals u.Id
+                        where uc.CourseId == courseAttendance.CourseId && u.RoleId == 2
+                        select new DisputeNotification
+                        {
+                            DisplayName = u.FirstName,
+                            ToAddress = u.EmailAddress,
+                            CourseName = courseAttendance.Course.CourseName
+                        };
+
+                    var courseProfessorDetails = professorDetails.FirstOrDefault();
+                    if (courseProfessorDetails != null)
+                    {
+                        Email.SendEmail(courseProfessorDetails.ToAddress, courseProfessorDetails.DisplayName,
+                            $"Dispute-{courseProfessorDetails.CourseName}", "Student disputed the course");
+                    }
+
                     context.SubmitChanges();
+
                     return new Result();
                 }
             }
@@ -201,7 +421,39 @@ namespace AttendancePortal.Dal
             {
                 return new Result(HttpStatusCode.InternalServerError, "Unable to update dispute reason");
             }
-            
+
+        }
+
+        public Result<List<CourseStartNotification>> GetCourseStartNotifications()
+        { 
+            try
+            {
+                using (var context = new AttendanceDataContext())
+                {
+                    var courseStart = from c in context.Courses
+                        join uc in context.UserCourses on c.Id equals uc.CourseId
+                        join u in context.Users on uc.UserId equals u.Id
+                        where
+                        (c.CourseStartTime > DateTime.Now.TimeOfDay &&
+                         c.CourseStartTime < DateTime.Now.AddMinutes(30).TimeOfDay)
+                        select new CourseStartNotification
+                        {
+                            CourseName = c.CourseName,
+                            FirstName = u.FirstName,
+                            EmailAddress = u.EmailAddress,
+                            CourseStartTime = c.CourseStartTime.Value,
+                            CourseBeforeTime = c.CheckInStartTime
+                        };
+
+                    var courseStartList = courseStart.ToList();
+                    return new Result<List<CourseStartNotification>>(courseStartList);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Result<List<CourseStartNotification>>(HttpStatusCode.InternalServerError);
+            }
+
         }
     }
 }

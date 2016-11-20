@@ -16,6 +16,12 @@ namespace AttendancePortal.Areas.AttendanceApi
             );
 
             context.Routes.MapHttpRoute(
+                "AttendanceApi_GetCourse",
+                "api/Attendance/courses",
+                new { controller = "Attendance", action = "GetCourses" }
+            );
+
+            context.Routes.MapHttpRoute(
                 "AttendanceApi_CheckInCourse",
                 "api/Attendance/CheckInCourse",
                 new { controller = "Attendance", action = "CheckInCourse" }
@@ -31,6 +37,12 @@ namespace AttendancePortal.Areas.AttendanceApi
                "AttendanceApi_DisputeCourse",
                "api/Attendance/DisputeCourse",
                new { controller = "Attendance", action = "DisputeCourse" }
+           );
+
+            context.Routes.MapHttpRoute(
+               "AttendanceApi_User",
+               "api/Attendance/user",
+               new { controller = "Attendance", action = "User" }
            );
         }
     }

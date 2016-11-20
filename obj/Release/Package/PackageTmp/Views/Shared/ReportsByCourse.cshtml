@@ -1,0 +1,33 @@
+﻿@model AttendancePortal.Models.ReportsViewModel
+<div class="marginTop10 marginBottom10">
+    @if (!Model.StudentsReports.Any())
+    {
+        <div>
+            <h1>There are no stats available</h1>
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Absents</th>
+                <th>Tardy</th>
+                <th>Presents</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var absentStudent in Model.StudentsReports)
+            {
+                <tr>
+                    <td>@absentStudent.Name</td>
+                    <td>@absentStudent.TotalAbsents</td>
+                    <td>@absentStudent.TotalTardy</td>
+                    <td>@absentStudent.TotalPresents</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>
